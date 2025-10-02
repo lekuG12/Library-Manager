@@ -1,5 +1,6 @@
 from flask import Flask, request
 from app.Schema.data import Users, session, Base, engine
+from sqlalchemy import text
 
 app = Flask(__name__)
 
@@ -21,7 +22,21 @@ def add_users():
 
 @app.route('/user', methods=['GET'])
 def list_users():
-    pass
+    try:
+        with engine.connect() as connection:
+            results = connection.execute(text('SELECT name FROM users'))
+
+            users = results.fetchall()
+
+            if users:
+                for user in users:
+                    return f'- {user[0]}'
+                
+            else:
+                return 'No user found'
+
+    except Exception as e:
+        return 'Error: {}'.format(e)
 
 
 @app.route('/users/<int:id>', methods=['GET'])

@@ -1,6 +1,7 @@
 from flask import Flask, request
 from app.Schema.data import Books, session, Base, engine
-from services.main import status
+from app.services.main import status
+from sqlalchemy import text
 
 app = Flask(__name__)
 
@@ -22,8 +23,21 @@ def add_users():
 
 
 @app.route('/book', methods=['GET'])
-def list_users():
-    pass
+def list_books():
+    try:
+        with engine.connect() as connection:
+            results = connection.execute(text('SELECT title FROM books'))
+
+            books = results.fetchall()
+
+            if books:
+                for book in books:
+                    return f'- {book[0]}'
+                
+            else:
+                return 'No books found'
+    except Exception as e:
+        return 'Error: {}'.format(e)
 
 
 @app.route('/books/<int:id>', methods=['GET'])
@@ -34,11 +48,11 @@ def by_id(id):
     
     return user
 
-@app.route('books/<int:id>', methods=['PUT'])
+@app.route('/books/<int:id>', methods=['PUT'])
 def update(id):
     pass
 
-@app.route('books/<int:id>', methods=['GET'])
+@app.route('/books/<int:id>', methods=['GET'])
 def delete_user(id):
     with session as db:
         user = db.query(Books).filter(Books.book_id == id).first()\
