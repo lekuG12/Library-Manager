@@ -6,16 +6,16 @@ app = Flask(__name__)
 
 @app.route('/users', methods=['POST'])
 def add_users():
-    name = request.form.get('name')
-    email = request.form.get('email')
-    phone = request.form.get('phone')
-    created_at = request.form.get('datetime')
+    data = request.get_json()
+    name = data.get('name')
+    email = data.get('email')
+    phone = data.get('phone')
 
-    with session as db:
-        new_user = Users(name=name, email=email, phone=phone, created_at=created_at)
-        db.add(new_user)
-        db.commit()
-        db.refresh()
+    with session() as db:
+        new_user = Users(name=name, email=email, phone=phone)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
 
     return 'User created', 200
 
@@ -23,14 +23,11 @@ def add_users():
 @app.route('/user', methods=['GET'])
 def list_users():
     try:
-        with engine.connect() as connection:
-            results = connection.execute(text('SELECT name FROM users'))
-
-            users = results.fetchall()
+        with session() as db:
+            users = db.query(Users).all()
 
             if users:
-                for user in users:
-                    return f'- {user[0]}'
+                return {'users': [ {'id': u.user_id, 'name': u.name, 'email': u.email, 'phone': u.phone } for u in users ]}
                 
             else:
                 return 'No user found'
@@ -42,10 +39,18 @@ def list_users():
 @app.route('/users/<int:id>', methods=['GET'])
 def by_id(id):
 
-    with session as db:
+    with session() as db:
         user = db.query(Users).filter(Users.user_id == id).first()
     
-    return user
+    if user:
+        return {
+            'id': user.user_id,
+            'name': user.name,
+            'email': user.email,
+            'phone': user.phone
+        }
+    else:
+        return 'User not found'
 
 @app.route('/users/<int:id>', methods=['PUT'])
 def update(id):
@@ -53,7 +58,7 @@ def update(id):
 
 @app.route('/users/<int:id>', methods=['GET'])
 def delete_user(id):
-    with session as db:
+    with session() as db:
         user = db.query(Users).filter(Users.user_id == id).first()\
         
         if user:

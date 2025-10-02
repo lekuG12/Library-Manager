@@ -1,10 +1,12 @@
-from flask import Flask
+from flask import Flask, request
+from app.Schema.data import Transaction, session, Base, engine
 
 app = Flask(__name__)
 
 @app.route('/borrow', methods=['POST'])
 def borrow():
-    pass
+    data = request.get_json()
+    
 
 @app.route('/return', methods=['POST'])
 def return_book():
