@@ -1,9 +1,9 @@
-from flask import Flask, request
+from flask import Blueprint, request
 from app.Schema.data import Books, session, Base, engine
 
-app = Flask(__name__)
+book_bp = Blueprint('book_bp', __name__)
 
-@app.route('/books', methods=['POST'])
+@book_bp.route('/books', methods=['POST'])
 def add_users():
     data = request.get_json()
     title = data.get('title')
@@ -20,7 +20,7 @@ def add_users():
     return 'Book created', 200
 
 
-@app.route('/book', methods=['GET'])
+@book_bp.route('/book', methods=['GET'])
 def list_books():
     try:
         with session() as db:
@@ -33,7 +33,7 @@ def list_books():
         return 'Error: {}'.format(e)
 
 
-@app.route('/books/<int:id>', methods=['GET'])
+@book_bp.route('/books/<int:id>', methods=['GET'])
 def by_id(id):
 
     with session() as db:
@@ -49,11 +49,11 @@ def by_id(id):
             'status': book.status
         }
 
-@app.route('/books/<int:id>', methods=['PUT'])
+@book_bp.route('/books/<int:id>', methods=['PUT'])
 def update(id):
     pass
 
-@app.route('/books/<int:id>', methods=['GET'])
+@book_bp.route('/books/<int:id>', methods=['GET'])
 def delete_user(id):
     with session as db:
         user = db.query(Books).filter(Books.book_id == id).first()\
@@ -68,4 +68,3 @@ def delete_user(id):
 
 if __name__ == '__main__':
     Base.metadata.create_all(bind=engine)
-    app.run(debug=True)

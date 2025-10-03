@@ -1,10 +1,10 @@
-from flask import Flask, request
+from flask import Blueprint, request
 from app.Schema.data import Users, session, Base, engine
 from sqlalchemy import text
 
-app = Flask(__name__)
+user_bp = Blueprint('user_bp', __name__)
 
-@app.route('/users', methods=['POST'])
+@user_bp.route('/users', methods=['POST'])
 def add_users():
     data = request.get_json()
     name = data.get('name')
@@ -20,7 +20,7 @@ def add_users():
     return 'User created', 200
 
 
-@app.route('/user', methods=['GET'])
+@user_bp.route('/user', methods=['GET'])
 def list_users():
     try:
         with session() as db:
@@ -36,7 +36,7 @@ def list_users():
         return 'Error: {}'.format(e)
 
 
-@app.route('/users/<int:id>', methods=['GET'])
+@user_bp.route('/users/<int:id>', methods=['GET'])
 def by_id(id):
 
     with session() as db:
@@ -52,11 +52,11 @@ def by_id(id):
     else:
         return 'User not found'
 
-@app.route('/users/<int:id>', methods=['PUT'])
+@user_bp.route('/users/<int:id>', methods=['PUT'])
 def update(id):
     pass
 
-@app.route('/users/<int:id>', methods=['GET'])
+@user_bp.route('/users/<int:id>', methods=['GET'])
 def delete_user(id):
     with session() as db:
         user = db.query(Users).filter(Users.user_id == id).first()\
@@ -71,4 +71,3 @@ def delete_user(id):
 
 if __name__ == '__main__':
     Base.metadata.create_all(bind=engine)
-    app.run(debug=True)

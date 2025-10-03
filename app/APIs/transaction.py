@@ -1,10 +1,10 @@
-from flask import Flask, request
+from flask import Blueprint, request
 from app.Schema.data import Transaction, Books, Users, session
 from datetime import datetime, timedelta
 
-app = Flask(__name__)
+transaction_bp = Blueprint('transaction_bp', __name__)
 
-@app.route('/borrow', methods=['POST'])
+@transaction_bp.route('/borrow', methods=['POST'])
 def borrow():
     data = request.get_json()
 
@@ -12,22 +12,23 @@ def borrow():
     book_id = data.get('book_id')
 
     with session() as db:
-        book = db.query(Books).filter(Books.book_id == book_id).first()
-        if not book or book.status != 'available':
-            return {'error': 'Book not available'}, 400
-        # Create transaction
-        due_date = datetime.utcnow() + timedelta(days=14)
-        transaction = Transaction(user_id=user_id, book_id=book_id, borrow_date=datetime.utcnow(), due_date=due_date, status='borrowed')
-        db.add(transaction)
-        # Update book status
-        book.status = 'borrowed'
-        db.commit()
-        db.refresh(transaction)
+       book = db.query(Books).filter(Books.book_id == book_id, Books.status == 'available').first()
 
-    return {'message': 'Book borrowed', 'transaction_id': transaction.transaction_id}
+       if not book or book.status != 'available':
+           return {'Error': 'Book not available'}, 400
+       
+       due_date = datetime.utcnow() + timedelta(days=15)
+       transactions = Transaction(user_id=user_id, book_id=book_id, due_date=due_date, status='borrowed')
+       book.status = 'borrowed'
+
+       db.add(transactions)
+       db.commit()
+       db.refresh(transactions)
+
+    return {'message': 'Book borrowed', 'transaction_id': transactions.transaction_id}
 
 
-@app.route('/return', methods=['POST'])
+@transaction_bp.route('/return', methods=['POST'])
 def return_book():
     data = request.get_json()
 
@@ -49,22 +50,21 @@ def return_book():
     return {'message': 'Book returned', 'transaction_id': transaction.transaction_id}
 
 
-@app.route('/transaction', methods=['GET'])
+@transaction_bp.route('/transaction', methods=['GET'])
 def transact():
     with session() as db:
-        transactions = db.query(Transaction).all()
-        return {'transactions': [
-            {
-                'id': t.transaction_id,
-                'user_id': t.user_id,
-                'book_id': t.book_id,
-                'borrow_date': t.borrow_date,
-                'due_date': t.due_date,
-                'return_date': t.return_date,
-                'status': t.status
-            } for t in transactions
-        ]}
+       transactions = db.query(Transaction).all()
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
+       if not transactions:
+              return {'message': 'No transactions found'}, 404
+       return {
+           'transactions': [
+               {
+                   'id': t.transaction_id,
+                   'user_id': t.user_id,
+                   'book_id': t.book_id,
+                   'borrwed_date': t.borrow_date,
+                   'due_date': t.due_date,
+               }
+           ] for t in transactions
+       }

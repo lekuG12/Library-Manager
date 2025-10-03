@@ -1,0 +1,9 @@
+Flask
+SQLAlchemy
+psycopg2-binary
+Flask-Migrate
+marshmallow
+flasgger
+flask_jwt_extended
+flask_sqlalchemy
+flask_marshmallow
