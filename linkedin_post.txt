@@ -1,0 +1,22 @@
+Hi everyone — I built a modular Library Manager API using Flask and PostgreSQL, and I wanted to share the project and the lessons learned.
+
+What it does:
+- Manage users, books, and borrow/return transactions
+- Exposes RESTful endpoints for all core operations
+- Keeps business logic clear and modular using Flask Blueprints
+
+Why I built it:
+- To learn better project structure for Flask apps
+- To practice SQLAlchemy + PostgreSQL schema design
+- To create a small but real-world backend I can extend
+
+Quick setup (local):
+1. Install PostgreSQL and create a database (see README.md)
+2. Create a virtualenv and install dependencies:
+	pip install -r requirements.txt
+3. Run the app:
+	python run.py
+
+Repo: <REPO_LINK_PLACEHOLDER>
+
+If you have feedback, ideas for features, or want to pair on extending it (pagination, auth, migrations), I’d love to hear from you. #Flask #Python #Postgres #APIDevelopment
