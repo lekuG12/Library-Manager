@@ -6,7 +6,7 @@ from datetime import datetime
 
 Base = declarative_base()
 
-DB_URL = 'postgresql://postgres:Sensei_237@127.0.0.1:5432/study_db'
+DB_URL = 'postgresql://username:password@localhost:5432/study_db'
 engine = create_engine(DB_URL)
 
 class Users(Base):
