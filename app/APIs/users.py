@@ -1,6 +1,5 @@
 from flask import Blueprint, request
 from app.Schema.data import Users, session, Base, engine
-from sqlalchemy import text
 
 user_bp = Blueprint('user_bp', __name__)
 
@@ -42,7 +41,7 @@ def by_id(id):
     with session() as db:
         user = db.query(Users).filter(Users.user_id == id).first()
     
-    if user:
+    if user: 
         return {
             'id': user.user_id,
             'name': user.name,
@@ -59,7 +58,7 @@ def update(id):
 @user_bp.route('/users/<int:id>', methods=['GET'])
 def delete_user(id):
     with session() as db:
-        user = db.query(Users).filter(Users.user_id == id).first()\
+        user = db.query(Users).filter(Users.user_id == id).first()
         
         if user:
             db.delete(user)
