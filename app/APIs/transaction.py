@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from app.Schema.data import Transaction, Books, Users, session
+from app.Schema.data import Transaction, Books, session
 from datetime import datetime, timedelta
 
 transaction_bp = Blueprint('transaction_bp', __name__)
