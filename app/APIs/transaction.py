@@ -53,18 +53,20 @@ def return_book():
 @transaction_bp.route('/transaction', methods=['GET'])
 def transact():
     with session() as db:
-       transactions = db.query(Transaction).all()
+        transactions = db.query(Transaction).all()
 
-       if not transactions:
-              return {'message': 'No transactions found'}, 404
-       return {
-           'transactions': [
-               {
-                   'id': t.transaction_id,
-                   'user_id': t.user_id,
-                   'book_id': t.book_id,
-                   'borrwed_date': t.borrow_date,
-                   'due_date': t.due_date,
-               }
-           ] for t in transactions
-       }
+        if not transactions:
+            return {'message': 'No transactions found'}, 404
+
+        return {
+            'transactions': [
+                {
+                    'id': t.transaction_id,
+                    'user_id': t.user_id,
+                    'book_id': t.book_id,
+                    'borrwed_date': t.borrow_date,  # Preserve existing key spelling
+                    'due_date': t.due_date,
+                }
+                for t in transactions
+            ]
+        }, 200
